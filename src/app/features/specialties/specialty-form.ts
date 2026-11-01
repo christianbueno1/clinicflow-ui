@@ -10,30 +10,24 @@ import { Specialty } from './specialty.model';
   selector: 'app-specialty-form',
   imports: [FormField, FormRoot],
   template: `
-    <form [formRoot]="f" class="flex max-w-md flex-col gap-3 rounded-lg border border-gray-200 p-4">
-      <label class="flex flex-col gap-1 text-sm font-medium">
+    <form [formRoot]="f" class="glass flex flex-col gap-4 p-5 sm:p-6">
+      <label class="flex flex-col gap-2 text-sm font-medium">
         Nombre
-        <input [formField]="f.name" class="rounded border border-gray-300 px-3 py-2 font-normal" />
+        <input [formField]="f.name" class="field" autocomplete="off" />
       </label>
 
       @if (f.name().touched() && f.name().invalid()) {
-        <ul class="text-sm text-red-600">
+        <ul class="text-sm text-clinic-rose">
           @for (error of f.name().errors(); track error) {
             <li>{{ error.message }}</li>
           }
         </ul>
       }
 
-      <div class="flex gap-2">
-        <button
-          type="submit"
-          [disabled]="f().submitting()"
-          class="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
-        >
+      <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <button type="button" class="btn" (click)="cancelled.emit()">Cancelar</button>
+        <button type="submit" class="btn-primary" [disabled]="f().submitting()">
           {{ f().submitting() ? 'Guardando…' : 'Guardar' }}
-        </button>
-        <button type="button" (click)="cancelled.emit()" class="rounded border px-4 py-2">
-          Cancelar
         </button>
       </div>
     </form>
