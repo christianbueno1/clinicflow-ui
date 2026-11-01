@@ -30,7 +30,7 @@ export function toDoctorInput(d: Doctor): DoctorInput {
     last_name: d.last_name,
     identification_number: d.identification_number,
     license_number: d.license_number,
-    specialty_id: d.specialty_id,
+    specialty_id: d.specialty.id,
     is_active: d.is_active,
   };
 }

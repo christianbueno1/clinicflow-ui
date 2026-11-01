@@ -23,82 +23,88 @@ const normalize = (v: DoctorInput): DoctorInput => ({
   imports: [FormField, FormRoot],
   template: `
     @if (specialties.isLoading()) {
-      <p>Cargando…</p>
+      <div class="glass animate-pulse p-5 text-sm text-clinic-muted" aria-busy="true">Cargando…</div>
+    } @else if (specialties.error()) {
+      <div class="glass flex flex-col items-start gap-3 p-5">
+        <p class="text-sm">No se pudieron cargar las especialidades.</p>
+        <div class="flex gap-2">
+          <button type="button" class="btn" (click)="specialties.reload()">Reintentar</button>
+          <button type="button" class="btn" (click)="cancelled.emit()">Cancelar</button>
+        </div>
+      </div>
     } @else {
-      <form [formRoot]="f" class="flex max-w-xl flex-col gap-3 rounded-lg border border-gray-200 p-4">
-        <label class="flex flex-col gap-1 text-sm font-medium">
-          Nombres
-          <input [formField]="f.first_name" class="rounded border border-gray-300 px-3 py-2 font-normal" />
-        </label>
-        @if (f.first_name().touched() && f.first_name().invalid()) {
-          <ul class="text-sm text-red-600">
-            @for (e of f.first_name().errors(); track e) { <li>{{ e.message }}</li> }
-          </ul>
-        }
+      <form [formRoot]="f" class="glass grid gap-4 p-5 sm:grid-cols-2 sm:p-6">
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-medium" for="first_name">Nombres</label>
+          <input id="first_name" [formField]="f.first_name" class="field" autocomplete="off" />
+          @if (f.first_name().touched() && f.first_name().invalid()) {
+            <ul class="text-sm text-clinic-rose">
+              @for (e of f.first_name().errors(); track e) { <li>{{ e.message }}</li> }
+            </ul>
+          }
+        </div>
 
-        <label class="flex flex-col gap-1 text-sm font-medium">
-          Apellidos
-          <input [formField]="f.last_name" class="rounded border border-gray-300 px-3 py-2 font-normal" />
-        </label>
-        @if (f.last_name().touched() && f.last_name().invalid()) {
-          <ul class="text-sm text-red-600">
-            @for (e of f.last_name().errors(); track e) { <li>{{ e.message }}</li> }
-          </ul>
-        }
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-medium" for="last_name">Apellidos</label>
+          <input id="last_name" [formField]="f.last_name" class="field" autocomplete="off" />
+          @if (f.last_name().touched() && f.last_name().invalid()) {
+            <ul class="text-sm text-clinic-rose">
+              @for (e of f.last_name().errors(); track e) { <li>{{ e.message }}</li> }
+            </ul>
+          }
+        </div>
 
-        <label class="flex flex-col gap-1 text-sm font-medium">
-          Cédula
-          <input [formField]="f.identification_number" inputmode="numeric" class="rounded border border-gray-300 px-3 py-2 font-normal" />
-        </label>
-        @if (f.identification_number().touched() && f.identification_number().invalid()) {
-          <ul class="text-sm text-red-600">
-            @for (e of f.identification_number().errors(); track e) { <li>{{ e.message }}</li> }
-          </ul>
-        }
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-medium" for="identification_number">Cédula</label>
+          <input id="identification_number" [formField]="f.identification_number" class="field font-mono" inputmode="numeric" autocomplete="off" />
+          @if (f.identification_number().touched() && f.identification_number().invalid()) {
+            <ul class="text-sm text-clinic-rose">
+              @for (e of f.identification_number().errors(); track e) { <li>{{ e.message }}</li> }
+            </ul>
+          }
+        </div>
 
-        <label class="flex flex-col gap-1 text-sm font-medium">
-          N.º de licencia
-          <input [formField]="f.license_number" class="rounded border border-gray-300 px-3 py-2 font-normal" />
-        </label>
-        @if (f.license_number().touched() && f.license_number().invalid()) {
-          <ul class="text-sm text-red-600">
-            @for (e of f.license_number().errors(); track e) { <li>{{ e.message }}</li> }
-          </ul>
-        }
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-medium" for="license_number">N.º de licencia</label>
+          <input id="license_number" [formField]="f.license_number" class="field font-mono" autocomplete="off" />
+          @if (f.license_number().touched() && f.license_number().invalid()) {
+            <ul class="text-sm text-clinic-rose">
+              @for (e of f.license_number().errors(); track e) { <li>{{ e.message }}</li> }
+            </ul>
+          }
+        </div>
 
-        <label class="flex flex-col gap-1 text-sm font-medium">
-          Especialidad
-          <select [formField]="f.specialty_id" class="rounded border border-gray-300 px-3 py-2 font-normal">
+        <div class="flex flex-col gap-2 sm:col-span-2">
+          <label class="text-sm font-medium" for="specialty_id">Especialidad</label>
+          <select id="specialty_id" [formField]="f.specialty_id" class="field">
             <option value="">Selecciona una especialidad</option>
             @for (s of specialties.value(); track s.id) {
               <option [value]="s.id">{{ s.name }}</option>
             }
           </select>
-        </label>
-        @if (f.specialty_id().touched() && f.specialty_id().invalid()) {
-          <ul class="text-sm text-red-600">
-            @for (e of f.specialty_id().errors(); track e) { <li>{{ e.message }}</li> }
-          </ul>
-        }
+          @if (f.specialty_id().touched() && f.specialty_id().invalid()) {
+            <ul class="text-sm text-clinic-rose">
+              @for (e of f.specialty_id().errors(); track e) { <li>{{ e.message }}</li> }
+            </ul>
+          }
+        </div>
 
-        <label class="flex items-center gap-2 text-sm font-medium">
-          <input type="checkbox" [formField]="f.is_active" />
-          Activo
+        <label class="flex items-center gap-3 py-1 text-sm font-medium sm:col-span-2">
+          <input type="checkbox" [formField]="f.is_active" class="size-5 accent-clinic-teal" />
+          Doctor activo
         </label>
 
         @if (serverError()) {
-          <p class="rounded bg-red-50 p-3 text-sm text-red-700">{{ serverError() }}</p>
+          <p role="alert" class="rounded-2xl border border-clinic-rose/40 bg-clinic-rose/10 p-4 text-sm sm:col-span-2">
+            {{ serverError() }}
+          </p>
         }
 
-        <div class="flex gap-2">
-          <button
-            type="submit"
-            [disabled]="f().submitting()"
-            class="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
-          >
+        <div class="flex flex-col-reverse gap-2 sm:col-span-2 sm:flex-row sm:justify-end">
+          <button type="button" class="btn" (click)="cancelled.emit()">Cancelar</button>
+          <button type="submit" class="btn-primary" [disabled]="f().submitting()">
             {{ f().submitting() ? 'Guardando…' : 'Guardar' }}
           </button>
-          <button type="button" (click)="cancelled.emit()" class="rounded border px-4 py-2">Cancelar</button>
         </div>
       </form>
     }
