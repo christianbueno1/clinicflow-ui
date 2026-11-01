@@ -1,1 +1,67 @@
-<router-outlet />
+<!-- Fondo oscuro al abrir el menú (solo móvil) -->
+@if (menuOpen()) {
+  <div class="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm lg:hidden" (click)="menuOpen.set(false)"></div>
+}
+
+<aside
+  class="fixed inset-y-0 left-0 z-40 flex w-64 flex-col gap-8 rounded-r-3xl border-r border-clinic-border bg-clinic-card/80 p-5 backdrop-blur-xl transition-transform duration-200 lg:translate-x-0 lg:rounded-none"
+  [class.-translate-x-full]="!menuOpen()"
+>
+  <div class="flex items-center gap-3 px-2">
+    <span class="grid size-9 place-items-center rounded-xl bg-clinic-teal/15 text-clinic-teal">
+      <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 5v14M5 12h14" />
+      </svg>
+    </span>
+    <span class="text-lg font-semibold tracking-tight">ClinicFlow</span>
+  </div>
+
+  <nav class="flex flex-col gap-1" aria-label="Principal">
+    @for (item of nav; track item.path) {
+      <a
+        [routerLink]="item.path"
+        routerLinkActive="bg-clinic-teal/15 text-clinic-teal"
+        (click)="menuOpen.set(false)"
+        class="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium text-clinic-muted transition hover:bg-white/5 hover:text-clinic-text"
+      >
+        <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path [attr.d]="item.icon" />
+        </svg>
+        {{ item.label }}
+      </a>
+    }
+  </nav>
+</aside>
+
+<div class="lg:pl-64">
+  <header class="sticky top-0 z-20 flex items-center justify-between border-b border-clinic-border bg-clinic-bg/60 px-4 py-3 backdrop-blur-xl sm:px-6 lg:px-8">
+    <button
+      type="button"
+      class="grid size-10 place-items-center rounded-xl border border-clinic-border text-clinic-muted hover:bg-white/5 hover:text-clinic-text lg:hidden"
+      aria-label="Abrir menú"
+      [attr.aria-expanded]="menuOpen()"
+      (click)="menuOpen.set(!menuOpen())"
+    >
+      <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+        <path d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+
+    <div class="ml-auto flex items-center gap-2 rounded-full border border-clinic-border px-3 py-1.5 text-xs text-clinic-muted" role="status">
+      @if (health.error()) {
+        <span class="size-2 rounded-full bg-clinic-rose"></span>
+        <span class="hidden sm:inline">API sin conexión</span>
+      } @else if (health.isLoading()) {
+        <span class="size-2 animate-pulse rounded-full bg-clinic-amber"></span>
+        <span class="hidden sm:inline">Conectando…</span>
+      } @else {
+        <span class="size-2 rounded-full bg-clinic-teal"></span>
+        <span class="hidden sm:inline">API en línea</span>
+      }
+    </div>
+  </header>
+
+  <main class="p-4 sm:p-6 lg:p-8">
+    <router-outlet />
+  </main>
+</div>
