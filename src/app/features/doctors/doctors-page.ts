@@ -28,17 +28,17 @@ import { Doctor } from './doctor.model';
         />
       }
 
-      <div class="grid gap-3 sm:max-w-xl sm:grid-cols-2">
-        <select [formField]="filterForm.specialty_id" class="field" aria-label="Filtrar por especialidad">
-          <option value="">Todas las especialidades</option>
+      <div class="grid grid-cols-2 gap-2 sm:max-w-xl sm:gap-3">
+        <select [formField]="filterForm.specialty_id" class="field px-3! py-2!" aria-label="Filtrar por especialidad">
+          <option value="">Especialidad</option>
           @for (s of specialties.value(); track s.id) {
             <option [value]="s.id">{{ s.name }}</option>
           }
         </select>
-        <select [formField]="filterForm.is_active" class="field" aria-label="Filtrar por estado">
-          <option value="">Activos e inactivos</option>
-          <option value="true">Solo activos</option>
-          <option value="false">Solo inactivos</option>
+        <select [formField]="filterForm.is_active" class="field px-3! py-2!" aria-label="Filtrar por estado">
+          <option value="">Estado</option>
+          <option value="true">Activos</option>
+          <option value="false">Inactivos</option>
         </select>
       </div>
 
