@@ -1,9 +1,10 @@
-import { Component, inject, linkedSignal, signal } from '@angular/core';
+import { Component, effect, inject, linkedSignal, signal } from '@angular/core';
 import { httpResource } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { form, FormField } from '@angular/forms/signals';
 
 import { apiErrorMessage } from '../../core/api-error';
+import { emptyPage, Page } from '../../core/page';
 import { SpecialtiesApi } from '../specialties/specialties-api';
 import { Specialty } from '../specialties/specialty.model';
 import { DoctorForm } from './doctor-form';
@@ -65,7 +66,7 @@ import { Doctor } from './doctor.model';
         </div>
       } @else {
         <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          @for (d of doctors.value(); track d.id) {
+          @for (d of doctors.value().items; track d.id) {
             <article class="glass flex flex-col gap-4 p-5 transition hover:bg-white/5">
               <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
@@ -104,16 +105,23 @@ import { Doctor } from './doctor.model';
           }
         </div>
 
-        @if (page() > 0 || doctors.value().length >= pageSize) {
-        <div class="flex items-center justify-between gap-3 sm:justify-start">
-            <div class="flex items-center justify-between gap-3 sm:justify-start">
-              <button type="button" class="btn" [disabled]="page() === 0" (click)="page.set(page() - 1)">Anterior</button>
-              <span class="text-sm text-clinic-muted">Página {{ page() + 1 }}</span>
-              <button type="button" class="btn" [disabled]="doctors.value().length < pageSize" (click)="page.set(page() + 1)">
-                Siguiente
-              </button>
-            </div>
-        </div>
+        @if (doctors.value().total_pages > 1) {
+          <nav class="flex items-center justify-between gap-3 sm:justify-start" aria-label="Paginación">
+            <button type="button" class="btn" [disabled]="page() === 1" (click)="page.set(page() - 1)">
+              Anterior
+            </button>
+            <span class="text-sm text-clinic-muted">
+              Página {{ page() }} de {{ doctors.value().total_pages }} · {{ doctors.value().total }} doctores
+            </span>
+            <button
+              type="button"
+              class="btn"
+              [disabled]="page() >= doctors.value().total_pages"
+              (click)="page.set(page() + 1)"
+            >
+              Siguiente
+            </button>
+          </nav>
         }        
       }
     </section>
@@ -126,25 +134,35 @@ export class DoctorsPage {
   protected readonly pageSize = 20;
   protected readonly filters = signal({ specialty_id: '', is_active: '' });
   protected readonly filterForm = form(this.filters);
-  protected readonly page = linkedSignal({ source: this.filters, computation: () => 0 });
+  // La API pagina desde 1; al cambiar los filtros se vuelve a la primera página.
+  protected readonly page = linkedSignal({ source: this.filters, computation: () => 1 });
 
   protected readonly specialties = httpResource<Specialty[]>(() => this.specialtiesApi.url, {
     defaultValue: [],
   });
 
-  protected readonly doctors = httpResource<Doctor[]>(
+  protected readonly doctors = httpResource<Page<Doctor>>(
     () => {
       const q = new URLSearchParams({
-        skip: String(this.page() * this.pageSize),
-        limit: String(this.pageSize),
+        page: String(this.page()),
+        page_size: String(this.pageSize),
       });
       const { specialty_id, is_active } = this.filters();
       if (specialty_id) q.set('specialty_id', specialty_id);
       if (is_active) q.set('is_active', is_active);
       return `${this.api.url}?${q}`;
     },
-    { defaultValue: [] },
+    { defaultValue: emptyPage<Doctor>(this.pageSize) },
   );
+
+  constructor() {
+    // Si eliminas el último registro de la última página, la API responde 200 con
+    // items vacíos; en ese caso retrocedemos a la última página válida.
+    effect(() => {
+      const { total_pages } = this.doctors.value();
+      if (total_pages > 0 && this.page() > total_pages) this.page.set(total_pages);
+    });
+  }
 
   protected readonly editing = signal<Doctor | 'new' | null>(null);
   protected readonly message = signal<string | null>(null);

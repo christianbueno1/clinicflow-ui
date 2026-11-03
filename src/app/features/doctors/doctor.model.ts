@@ -6,14 +6,15 @@ export interface Doctor {
   last_name: string;
   identification_number: string;
   license_number: string;
-  specialty_id: string;
   is_active: boolean;
   specialty: Specialty;
   created_at: string;
   updated_at: string;
 }
 
-export type DoctorInput = Omit<Doctor, 'id' | 'specialty' | 'created_at' | 'updated_at'>;
+export type DoctorInput = Omit<Doctor, 'id' | 'specialty' | 'created_at' | 'updated_at'> & {
+  specialty_id: string;
+};
 
 export const EMPTY_DOCTOR: DoctorInput = {
   first_name: '',
