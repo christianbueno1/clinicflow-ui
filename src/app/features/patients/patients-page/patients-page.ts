@@ -8,9 +8,10 @@ import { emptyPage, Page } from '../../../core/page';
 import { PatientForm } from '../patient-form/patient-form';
 import { PatientsApi } from '../patients-api';
 import { Patient } from '../patient.model';
+import { ConfirmDialog } from '../../../core/confirm-dialog';
 
 @Component({
-  imports: [Modal, PatientForm],
+  imports: [Modal, PatientForm, ConfirmDialog],
   selector: 'app-patients-page',
   templateUrl: './patients-page.html',
 })
@@ -39,6 +40,7 @@ export class PatientsPage {
   );
 
   protected readonly editing = signal<Patient | 'new' | null>(null);
+  protected readonly deleting = signal<Patient | null>(null);
   protected readonly message = signal<string | null>(null);
 
   constructor() {
@@ -62,8 +64,10 @@ export class PatientsPage {
     this.patients.reload();
   }
 
-  protected async remove(p: Patient) {
-    if (!confirm(`¿Eliminar a ${p.first_name} ${p.last_name}?`)) return;
+  protected async confirmRemove() {
+    const p = this.deleting();
+    if (!p) return;
+    this.deleting.set(null);
     try {
       await firstValueFrom(this.api.remove(p.id));
       this.message.set(null);

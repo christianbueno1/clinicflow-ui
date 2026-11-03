@@ -13,6 +13,14 @@
       />
     </app-modal>
   }
+  @if (deleting(); as p) {
+    <app-confirm-dialog
+      title="Eliminar paciente"
+      [message]="'¿Eliminar a ' + p.first_name + ' ' + p.last_name + '? Esta acción no se puede deshacer.'"
+      (confirmed)="confirmRemove()"
+      (cancelled)="deleting.set(null)"
+    />
+  }  
 
   <input
     type="search"
@@ -74,7 +82,7 @@
 
           <div class="flex gap-2">
             <button type="button" class="btn flex-1" (click)="editing.set(p)">Editar</button>
-            <button type="button" class="btn flex-1 hover:text-clinic-rose" (click)="remove(p)">Eliminar</button>
+            <button type="button" class="btn flex-1 hover:text-clinic-rose" (click)="deleting.set(p)">Eliminar</button>
           </div>
         </article>
       } @empty {
