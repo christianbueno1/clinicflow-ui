@@ -22,6 +22,7 @@ export class PatientsPage {
 
   // `q` es el término ya aplicado (con retardo); el input solo lo actualiza tras una pausa.
   protected readonly q = signal('');
+  protected readonly draft = signal('');
   private timer?: ReturnType<typeof setTimeout>;
 
   // La API pagina desde 1; al cambiar la búsqueda se vuelve a la primera página.
@@ -54,8 +55,15 @@ export class PatientsPage {
   }
 
   protected onSearch(value: string) {
+    this.draft.set(value);
     clearTimeout(this.timer);
     this.timer = setTimeout(() => this.q.set(value.trim()), 300);
+  }
+
+  protected clearSearch() {
+    clearTimeout(this.timer);
+    this.draft.set('');
+    this.q.set('');
   }
 
   protected onSaved() {

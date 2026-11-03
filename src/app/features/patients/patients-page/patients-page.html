@@ -22,14 +22,29 @@
     />
   }  
 
-  <input
-    type="search"
-    class="field sm:max-w-md"
-    placeholder="Buscar por nombre, apellido o cédula"
-    aria-label="Buscar pacientes"
-    autocomplete="off"
-    (input)="onSearch($any($event.target).value)"
-  />
+  <div class="relative sm:max-w-md">
+    <input
+      type="search"
+      class="field pr-10 [&::-webkit-search-cancel-button]:appearance-none"
+      placeholder="Buscar por nombre, apellido o cédula"
+      aria-label="Buscar pacientes"
+      autocomplete="off"
+      [value]="draft()"
+      (input)="onSearch($any($event.target).value)"
+    />
+    @if (draft()) {
+      <button
+        type="button"
+        class="absolute inset-y-0 right-0 grid w-10 place-items-center text-clinic-muted hover:text-clinic-text"
+        aria-label="Limpiar búsqueda"
+        (click)="clearSearch()"
+      >
+        <svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+          <path d="M6 6l12 12M18 6 6 18" />
+        </svg>
+      </button>
+    }
+  </div>
 
   @if (message()) {
     <p role="alert" class="rounded-2xl border border-clinic-rose/40 bg-clinic-rose/10 p-4 text-sm">
