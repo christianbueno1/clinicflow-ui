@@ -1,1 +1,92 @@
-<p>patient-form works!</p>
+<form [formRoot]="f" class="glass grid gap-4 p-5 sm:grid-cols-2 sm:p-6">
+  <div class="flex flex-col gap-2">
+    <label class="text-sm font-medium" for="first_name">Nombres</label>
+    <input id="first_name" [formField]="f.first_name" class="field" autocomplete="off" />
+    @if (f.first_name().touched() && f.first_name().invalid()) {
+      <ul class="text-sm text-clinic-rose">
+        @for (e of f.first_name().errors(); track e) { <li>{{ e.message }}</li> }
+      </ul>
+    }
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <label class="text-sm font-medium" for="last_name">Apellidos</label>
+    <input id="last_name" [formField]="f.last_name" class="field" autocomplete="off" />
+    @if (f.last_name().touched() && f.last_name().invalid()) {
+      <ul class="text-sm text-clinic-rose">
+        @for (e of f.last_name().errors(); track e) { <li>{{ e.message }}</li> }
+      </ul>
+    }
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <label class="text-sm font-medium" for="identification_number">Cédula</label>
+    <input id="identification_number" [formField]="f.identification_number" class="field font-mono" inputmode="numeric" autocomplete="off" />
+    @if (f.identification_number().touched() && f.identification_number().invalid()) {
+      <ul class="text-sm text-clinic-rose">
+        @for (e of f.identification_number().errors(); track e) { <li>{{ e.message }}</li> }
+      </ul>
+    }
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <label class="text-sm font-medium" for="phone">Teléfono</label>
+    <input id="phone" type="tel" [formField]="f.phone" class="field font-mono" autocomplete="off" />
+    @if (f.phone().touched() && f.phone().invalid()) {
+      <ul class="text-sm text-clinic-rose">
+        @for (e of f.phone().errors(); track e) { <li>{{ e.message }}</li> }
+      </ul>
+    }
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <label class="text-sm font-medium" for="date_of_birth">Fecha de nacimiento</label>
+    <input id="date_of_birth" type="date" [attr.max]="today" [formField]="f.date_of_birth" class="field" />
+    @if (f.date_of_birth().touched() && f.date_of_birth().invalid()) {
+      <ul class="text-sm text-clinic-rose">
+        @for (e of f.date_of_birth().errors(); track e) { <li>{{ e.message }}</li> }
+      </ul>
+    }
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <label class="text-sm font-medium" for="sex">Sexo</label>
+    <select id="sex" [formField]="f.sex" class="field">
+      <option value="female">Femenino</option>
+      <option value="male">Masculino</option>
+    </select>
+  </div>
+
+  <div class="flex flex-col gap-2 sm:col-span-2">
+    <label class="text-sm font-medium" for="email">Correo (opcional)</label>
+    <input id="email" type="email" [formField]="f.email" class="field" autocomplete="off" />
+    @if (f.email().touched() && f.email().invalid()) {
+      <ul class="text-sm text-clinic-rose">
+        @for (e of f.email().errors(); track e) { <li>{{ e.message }}</li> }
+      </ul>
+    }
+  </div>
+
+  <div class="flex flex-col gap-2 sm:col-span-2">
+    <label class="text-sm font-medium" for="address">Dirección (opcional)</label>
+    <textarea id="address" rows="2" [formField]="f.address" class="field"></textarea>
+    @if (f.address().touched() && f.address().invalid()) {
+      <ul class="text-sm text-clinic-rose">
+        @for (e of f.address().errors(); track e) { <li>{{ e.message }}</li> }
+      </ul>
+    }
+  </div>
+
+  @if (serverError()) {
+    <p role="alert" class="rounded-2xl border border-clinic-rose/40 bg-clinic-rose/10 p-4 text-sm sm:col-span-2">
+      {{ serverError() }}
+    </p>
+  }
+
+  <div class="flex flex-col-reverse gap-2 sm:col-span-2 sm:flex-row sm:justify-end">
+    <button type="button" class="btn" (click)="cancelled.emit()">Cancelar</button>
+    <button type="submit" class="btn-primary" [disabled]="f().submitting()">
+      {{ f().submitting() ? 'Guardando…' : 'Guardar' }}
+    </button>
+  </div>
+</form>
