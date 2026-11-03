@@ -10,10 +10,11 @@ import { Specialty } from '../specialties/specialty.model';
 import { DoctorForm } from './doctor-form';
 import { DoctorsApi } from './doctors-api';
 import { Doctor } from './doctor.model';
+import { Modal } from '../../core/modal';
 
 @Component({
   selector: 'app-doctors-page',
-  imports: [DoctorForm, FormField],
+  imports: [DoctorForm, FormField, Modal],
   template: `
     <section class="mx-auto flex max-w-6xl flex-col gap-6">
       <header class="flex items-center justify-between gap-3">
@@ -22,11 +23,13 @@ import { Doctor } from './doctor.model';
       </header>
 
       @if (editing(); as current) {
-        <app-doctor-form
-          [doctor]="current === 'new' ? null : current"
-          (saved)="onSaved()"
-          (cancelled)="editing.set(null)"
-        />
+        <app-modal [label]="current === 'new' ? 'Nuevo doctor' : 'Editar doctor'" (closed)="editing.set(null)">
+          <app-doctor-form
+            [doctor]="current === 'new' ? null : current"
+            (saved)="onSaved()"
+            (cancelled)="editing.set(null)"
+          />
+        </app-modal>
       }
 
       <div class="grid grid-cols-2 gap-2 sm:max-w-xl sm:gap-3">
