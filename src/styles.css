@@ -1,3 +1,67 @@
-/* You can add global styles to this file, and also import other style files */
-
 @import 'tailwindcss';
+
+@theme {
+  --color-clinic-bg: #0f171a;
+  --color-clinic-card: #162024;
+  --color-clinic-border: #24343a;
+  --color-clinic-text: #e6eef0;
+  --color-clinic-muted: #8fa3a8;
+  --color-clinic-teal: #14b8a6;
+  --color-clinic-rose: #f43f5e;
+  --color-clinic-amber: #fbbf24;
+
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-clinic-bg font-sans text-clinic-text antialiased;
+    min-height: 100dvh;
+    background-image:
+      radial-gradient(60rem 40rem at 10% -10%, rgb(20 184 166 / 0.12), transparent 60%),
+      radial-gradient(50rem 40rem at 110% 10%, rgb(244 63 94 / 0.07), transparent 60%);
+    background-attachment: fixed;
+  }
+
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-clinic-teal);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* Superficie translúcida: úsala como `class="glass"` en tarjetas y paneles. */
+@utility glass {
+  background-color: color-mix(in srgb, var(--color-clinic-card) 70%, transparent);
+  border: 1px solid var(--color-clinic-border);
+  border-radius: var(--radius-3xl);
+  backdrop-filter: blur(16px);
+}
+
+@utility field {
+  @apply w-full rounded-2xl border border-clinic-border bg-black/20 px-4 py-2.5 text-base text-clinic-text transition placeholder:text-clinic-muted focus:border-clinic-teal sm:text-sm;
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-2xl border border-clinic-border px-4 py-2.5 text-sm font-medium text-clinic-text transition hover:bg-white/5 disabled:opacity-50;
+}
+
+@utility btn-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-2xl bg-clinic-teal px-4 py-2.5 text-sm font-semibold text-clinic-bg transition hover:brightness-110 disabled:opacity-50;
+}
