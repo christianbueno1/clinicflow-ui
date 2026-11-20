@@ -10,10 +10,12 @@ import { Specialty } from '../specialties/specialty.model';
 import { DoctorForm } from './doctor-form';
 import { DoctorsApi } from './doctors-api';
 import { Doctor } from './doctor.model';
+import { Modal } from '../../core/modal';
+import { ConfirmDialog } from '../../core/confirm-dialog';
 
 @Component({
   selector: 'app-doctors-page',
-  imports: [DoctorForm, FormField],
+  imports: [DoctorForm, FormField, Modal, ConfirmDialog],
   template: `
     <section class="mx-auto flex max-w-6xl flex-col gap-6">
       <header class="flex items-center justify-between gap-3">
@@ -22,12 +24,22 @@ import { Doctor } from './doctor.model';
       </header>
 
       @if (editing(); as current) {
-        <app-doctor-form
-          [doctor]="current === 'new' ? null : current"
-          (saved)="onSaved()"
-          (cancelled)="editing.set(null)"
-        />
+        <app-modal [label]="current === 'new' ? 'Nuevo doctor' : 'Editar doctor'" (closed)="editing.set(null)">
+          <app-doctor-form
+            [doctor]="current === 'new' ? null : current"
+            (saved)="onSaved()"
+            (cancelled)="editing.set(null)"
+          />
+        </app-modal>
       }
+      @if (deleting(); as d) {
+        <app-confirm-dialog
+          title="Eliminar doctor"
+          [message]="'¿Eliminar a ' + d.first_name + ' ' + d.last_name + '? Esta acción no se puede deshacer.'"
+          (confirmed)="confirmRemove()"
+          (cancelled)="deleting.set(null)"
+        />
+      }      
 
       <div class="grid grid-cols-2 gap-2 sm:max-w-xl sm:gap-3">
         <select [formField]="filterForm.specialty_id" class="field px-3! py-2!" aria-label="Filtrar por especialidad">
@@ -97,7 +109,7 @@ import { Doctor } from './doctor.model';
 
               <div class="flex gap-2">
                 <button type="button" class="btn flex-1" (click)="editing.set(d)">Editar</button>
-                <button type="button" class="btn flex-1 hover:text-clinic-rose" (click)="remove(d)">Eliminar</button>
+                <button type="button" class="btn flex-1 hover:text-clinic-rose" (click)="deleting.set(d)">Eliminar</button>
               </div>
             </article>
           } @empty {
@@ -165,6 +177,7 @@ export class DoctorsPage {
   }
 
   protected readonly editing = signal<Doctor | 'new' | null>(null);
+  protected readonly deleting = signal<Doctor | null>(null);
   protected readonly message = signal<string | null>(null);
 
   protected onSaved() {
@@ -173,8 +186,10 @@ export class DoctorsPage {
     this.doctors.reload();
   }
 
-  protected async remove(d: Doctor) {
-    if (!confirm(`¿Eliminar a ${d.first_name} ${d.last_name}?`)) return;
+  protected async confirmRemove() {
+    const d = this.deleting();
+    if (!d) return;
+    this.deleting.set(null);
     try {
       await firstValueFrom(this.api.remove(d.id));
       this.message.set(null);

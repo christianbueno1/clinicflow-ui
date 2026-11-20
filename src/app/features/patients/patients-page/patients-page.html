@@ -1,0 +1,129 @@
+<section class="mx-auto flex max-w-6xl flex-col gap-6">
+  <header class="flex items-center justify-between gap-3">
+    <h1 class="text-2xl font-semibold tracking-tight">Pacientes</h1>
+    <button type="button" class="btn-primary" (click)="editing.set('new')">Nuevo</button>
+  </header>
+
+  @if (editing(); as current) {
+    <app-modal [label]="current === 'new' ? 'Nuevo paciente' : 'Editar paciente'" (closed)="editing.set(null)">
+      <app-patient-form
+        [patient]="current === 'new' ? null : current"
+        (saved)="onSaved()"
+        (cancelled)="editing.set(null)"
+      />
+    </app-modal>
+  }
+  @if (deleting(); as p) {
+    <app-confirm-dialog
+      title="Eliminar paciente"
+      [message]="'¿Eliminar a ' + p.first_name + ' ' + p.last_name + '? Esta acción no se puede deshacer.'"
+      (confirmed)="confirmRemove()"
+      (cancelled)="deleting.set(null)"
+    />
+  }  
+
+  <div class="relative sm:max-w-md">
+    <input
+      type="search"
+      class="field pr-10 [&::-webkit-search-cancel-button]:appearance-none"
+      placeholder="Buscar por nombre, apellido o cédula"
+      aria-label="Buscar pacientes"
+      autocomplete="off"
+      [value]="draft()"
+      (input)="onSearch($any($event.target).value)"
+    />
+    @if (draft()) {
+      <button
+        type="button"
+        class="absolute inset-y-0 right-0 grid w-10 place-items-center text-clinic-muted hover:text-clinic-text"
+        aria-label="Limpiar búsqueda"
+        (click)="clearSearch()"
+      >
+        <svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+          <path d="M6 6l12 12M18 6 6 18" />
+        </svg>
+      </button>
+    }
+  </div>
+
+  @if (message()) {
+    <p role="alert" class="rounded-2xl border border-clinic-rose/40 bg-clinic-rose/10 p-4 text-sm">
+      {{ message() }}
+    </p>
+  }
+
+  @if (patients.isLoading()) {
+    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" aria-busy="true">
+      @for (i of [1, 2, 3]; track i) {
+        <div class="glass flex animate-pulse flex-col gap-4 p-5">
+          <div class="h-5 w-40 rounded bg-white/10"></div>
+          <div class="h-4 w-24 rounded bg-white/10"></div>
+          <div class="h-10 rounded bg-white/10"></div>
+        </div>
+      }
+    </div>
+  } @else if (patients.error()) {
+    <div class="glass flex flex-col items-start gap-3 p-5">
+      <p class="text-sm">No se pudo cargar el listado.</p>
+      <button type="button" class="btn" (click)="patients.reload()">Reintentar</button>
+    </div>
+  } @else {
+    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      @for (p of patients.value().items; track p.id) {
+        <article class="glass flex flex-col gap-4 p-5 transition hover:bg-white/5">
+          <div class="min-w-0">
+            <h2 class="truncate font-semibold">{{ p.first_name }} {{ p.last_name }}</h2>
+            <p class="truncate text-sm text-clinic-muted">{{ p.email ?? 'Sin correo' }}</p>
+          </div>
+
+          <dl class="grid grid-cols-2 gap-3 text-sm">
+            <div class="min-w-0">
+              <dt class="text-xs text-clinic-muted">Cédula</dt>
+              <dd class="truncate font-mono">{{ p.identification_number }}</dd>
+            </div>
+            <div class="min-w-0">
+              <dt class="text-xs text-clinic-muted">Teléfono</dt>
+              <dd class="truncate font-mono">{{ p.phone }}</dd>
+            </div>
+            <div class="min-w-0">
+              <dt class="text-xs text-clinic-muted">Nacimiento</dt>
+              <dd class="truncate font-mono">{{ p.date_of_birth }}</dd>
+            </div>
+            <div class="min-w-0">
+              <dt class="text-xs text-clinic-muted">Sexo</dt>
+              <dd>{{ p.sex === 'female' ? 'Femenino' : 'Masculino' }}</dd>
+            </div>
+          </dl>
+
+          <div class="flex gap-2">
+            <button type="button" class="btn flex-1" (click)="editing.set(p)">Editar</button>
+            <button type="button" class="btn flex-1 hover:text-clinic-rose" (click)="deleting.set(p)">Eliminar</button>
+          </div>
+        </article>
+      } @empty {
+        <p class="text-sm text-clinic-muted sm:col-span-2 xl:col-span-3">
+          {{ q() ? 'Ningún paciente coincide con la búsqueda.' : 'Aún no hay pacientes.' }}
+        </p>
+      }
+    </div>
+
+    @if (patients.value().total_pages > 1) {
+      <nav class="flex items-center justify-between gap-3 sm:justify-start" aria-label="Paginación">
+        <button type="button" class="btn" [disabled]="page() === 1" (click)="page.set(page() - 1)">
+          Anterior
+        </button>
+        <span class="text-sm text-clinic-muted">
+          Página {{ page() }} de {{ patients.value().total_pages }} · {{ patients.value().total }} pacientes
+        </span>
+        <button
+          type="button"
+          class="btn"
+          [disabled]="page() >= patients.value().total_pages"
+          (click)="page.set(page() + 1)"
+        >
+          Siguiente
+        </button>
+      </nav>
+    }
+  }
+</section>
